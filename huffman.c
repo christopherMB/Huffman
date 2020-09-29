@@ -348,7 +348,7 @@ Node* dequeue(Queue* q){
     if (!is_empty(q)){
         ElementQ* old = q->queue_last;
         if (q->queue_last == q->queue_first) q->queue_first = NULL;
-        q->queue_last = q->queue_last->prev;
+        else q->queue_last = q->queue_last->prev;
         if (q->queue_last) q->queue_last->next = NULL;
         Node* n = old->data;
         free(old);
@@ -379,7 +379,6 @@ Node* get_huffman_tree_opti(Node** array, size_t n){
         enqueue(q1, array[i]);
         i++;
     }
-
     while (!is_empty(q1) || !is_empty(q2)){
         Node* left = get_minfrom_queues(q1, q2);
         Node* right = get_minfrom_queues(q1, q2);
