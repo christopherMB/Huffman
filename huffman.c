@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <strings.h>
 
+///A
 void char_to_binary(char c, char byte[8]){
     for (int i = 0; i < 8; i++){
         byte[i] = 0;
@@ -33,6 +34,7 @@ void text_to_binary(const char* input, const char* output){
     fclose(output_file);
 }
 
+///B
 int count_letters(const char* input){
     FILE* input_file;
     input_file = fopen(input, "r");
@@ -45,7 +47,7 @@ int count_letters(const char* input){
     return count;
 }
 
-
+///C
 Element* create_element(char c){
     Element* new_el = (Element*)malloc(sizeof(Element));
     new_el->node = (Node*)malloc(sizeof(Node));
@@ -74,6 +76,7 @@ Element* get_occurrences(const char* input){
     return list_of_occurrences;
 }
 
+///D
 Element* get_min_occurrence(Element** l){
     if (*l == NULL) return NULL;
     else if ((*l)->next == NULL){
@@ -120,6 +123,7 @@ Node* get_huffman_tree(Element* l){
     return res;
 }
 
+///E
 void store_node(Node* node, char code[MAX_CODE], const char* output){
     
     if (node != NULL){
@@ -145,18 +149,16 @@ void store_node(Node* node, char code[MAX_CODE], const char* output){
 
 void store_dictionary_from_tree(Node* t, const char* output){
     FILE* output_file;
-    output_file = fopen(output, "w");
-    fprintf(output_file, "");
+    output_file = fopen(output, "w");//clear any previous dico
     fclose(output_file);
     char code[MAX_CODE] = "";
     store_node(t, code, output);
 }
 
+/// F
 void get_code_from_dico(char c, const char* dico, char code[MAX_CODE]){
     FILE* dico_file;
     dico_file = fopen(dico, "r");
-    int count = 0;
-    char ch;
     int found = 0;
     char line[MAX_CODE*2];
     while (fgets(line, MAX_CODE*2, dico_file) && !found)
@@ -184,7 +186,6 @@ void huffman_code(const char* input, const char* dico, const char* output){
     output_file = fopen(output, "w");
     char code[MAX_CODE];
     char ch;
-    char byte[8];
     while ((ch = fgetc(input_file)) != EOF){
         get_code_from_dico(ch, dico, code);
         fprintf(output_file, "%s", code);
@@ -194,17 +195,44 @@ void huffman_code(const char* input, const char* dico, const char* output){
     fclose(output_file);
 }
 
-
+/// G
 void huffman_compression(const char* input, const char* output){
     const char* dico_file = "files/dico.txt";
 
     Element* occ = get_occurrences(input);
     Node* tree = get_huffman_tree(occ);
     store_dictionary_from_tree(tree, dico_file);
-
     huffman_code(input, dico_file, output);
+    free_tree(tree);
 }
 
+///H
+int move_in_tree(Node** t, char code){
+    if (code == '0') *t = (*t)->left;
+    else *t = (*t)->right;
+    if ((*t)->left == NULL && (*t)->right == NULL) return 1;
+    return 0;
+}
+
+void huffman_decode(const char* input, const char* output, Node* t){
+    FILE* input_file;
+    FILE* output_file;
+    input_file = fopen(input, "r");
+    output_file = fopen(output, "w");
+    char ch;
+    Node* temp = t;
+    while ((ch = fgetc(input_file)) != EOF){
+        if (move_in_tree(&temp, ch) == 1){
+            fprintf(output_file, "%c", temp->letter);
+            temp = t;
+        }     
+    }
+
+    fclose(input_file);
+    fclose(output_file);
+}
+
+/// I
 int add_existing_occurrence_dico(char c, Node** array, size_t n){
     if (n <= 0) return 0;
     else{
@@ -259,7 +287,6 @@ void add_occurrence_opti(char c, Node*** array, size_t* n){
     
 }
 
-
 void get_occurrences_opti(const char* input, Node*** array, size_t* n){
     FILE* input_file;
     input_file = fopen(input, "r");
@@ -268,6 +295,7 @@ void get_occurrences_opti(const char* input, Node*** array, size_t* n){
     fclose(input_file);
 }
 
+/// J
 void swap(Node**a, Node**b) {
     Node* temp = *a;
     *a = *b;
@@ -294,6 +322,7 @@ void heapSort(Node** arr, int n) {
     }
 }
 
+/// K
 Queue* create_queue(){
     Queue* q = (Queue*)malloc(sizeof(Queue));
     q->queue_first = NULL;
@@ -354,7 +383,11 @@ Node* get_huffman_tree_opti(Node** array, size_t n){
     while (!is_empty(q1) || !is_empty(q2)){
         Node* left = get_minfrom_queues(q1, q2);
         Node* right = get_minfrom_queues(q1, q2);
-        if (right == NULL) return left; // One node left => it's the tree.
+        if (right == NULL) {
+            free(q1);
+            free(q2);
+            return left; // One node left => it's the tree.
+        }
         else{
             // The new node has occurrences of the sum of each old nodes
             Node* new_node = (Node*)malloc(sizeof(Node));
@@ -364,8 +397,12 @@ Node* get_huffman_tree_opti(Node** array, size_t n){
             enqueue(q2, new_node);
         }
     }
+    free(q1);
+    free(q2);
+    return NULL;
 }
 
+/// L
 void add_Node_BST(DicoNode** tree, DicoNode* added)
 {
     if ((*tree) == NULL)
@@ -424,8 +461,6 @@ void left_rot(DicoNode** tree)
         *tree = temp;
     }
 }
-
-
 
 void balance(DicoNode** tree)
 {
@@ -515,12 +550,91 @@ void huffman_code_opti(const char* input, DicoNode* dico_AVL, const char* output
     fclose(output_file);
 }
 
+/// M
 void huffman_compression_opti(const char* input, const char* output){
     Node** occ = NULL;
     size_t n = 0;
     get_occurrences_opti(input, &occ, &n);
     heapSort(occ, n);
     Node* tree = get_huffman_tree_opti(occ, n);
+    //creating the dico file
+    store_dictionary_from_tree(tree, "files/dico.txt");
     DicoNode* tree_dico = get_dictionary_AVL_from_tree(tree);
     huffman_code_opti(input, tree_dico, output);
+    free(occ);
+    free_dico_tree(tree_dico);
+    free_tree(tree);
+}
+
+/// N
+void add_letter_to_huffman_tree(char c, char code[], Node** tree){
+    if (*tree == NULL){
+        *tree = (Node*)malloc(sizeof(Node));
+        (*tree)->left = NULL;
+        (*tree)->right = NULL;
+    }
+    if (code[0] == '\0') (*tree)->letter = c;
+    else{
+        if (code[0] == '0') add_letter_to_huffman_tree(c, code + 1, &((*tree)->left));
+        else add_letter_to_huffman_tree(c, code + 1, &((*tree)->right));
+    }
+
+}
+
+Node* get_huffman_tree_from_dico(const char* dico){
+    FILE* dico_file;
+    dico_file = fopen(dico, "r");
+    int found = 0;
+    char line[MAX_CODE*2];
+    char code[MAX_CODE];
+    char c;
+    Node* tree = NULL;
+    while (fgets(line, MAX_CODE*2, dico_file) && !found)
+    {   
+        c = line[0];
+        if (line[1]!= ':'){//second condition to deal with the space being first in line after a line break
+            if (line[0] == '\n'){
+                fgets(line, MAX_CODE*2, dico_file);
+                strcpy(code, line + 3);
+                *strchr(code, '\n') = '\0';
+            }
+            else {
+                strcpy(code, line + 4);
+                *strchr(code, '\n') = '\0';
+            }
+            add_letter_to_huffman_tree(c, code, &tree);
+        }
+    }
+    fclose(dico_file);
+    return tree;
+}
+
+void huffman_decompression(const char* input, const char* dico, const char* output){
+    Node* tree = get_huffman_tree_from_dico(dico);
+    huffman_decode(input, output, tree);
+    free_tree(tree);
+}
+
+/// Tools
+void free_tree(Node* tree){
+    if(tree){
+        free_tree(tree->left);
+        free_tree(tree->right);
+        free(tree);
+    }
+}
+
+void free_dico_tree(DicoNode* tree){
+    if(tree){
+        free_dico_tree(tree->left);
+        free_dico_tree(tree->right);
+        free(tree);
+    }
+}
+
+void free_list(Element* l){
+    if(l){
+        free_list(l->next);
+        free(l);
+    }
 }

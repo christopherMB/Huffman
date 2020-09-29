@@ -1,3 +1,0 @@
-change 9 and 20 to MAX_CODE
-free !!
-remove byte from huffman_code

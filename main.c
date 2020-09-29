@@ -16,11 +16,14 @@ void pretty_print(int n){
     printf("%d\n", n);
 }
 
+
 int main(){
 
     const char* input_file = "files/input.txt";
-    const char* output_file = "files/output.txt";
-    const char* output_huffman_file = "files/output_huffman.txt";
+    const char* output_file = "files/binary.txt";
+    const char* output_huffman_file = "files/huffman.txt";
+    const char* dico_file = "files/dico.txt";
+    const char* decompressed_file = "files/decompressed.txt";
     clock_t begin, end;
     
         
@@ -35,7 +38,13 @@ int main(){
         printf("Huffman Output count : "); 
         pretty_print(count_letters(output_huffman_file));
         end = clock();
-        
+        //Decoding part
+        Element* occ = get_occurrences(input_file);
+        Node* tree = get_huffman_tree(occ);
+        huffman_decode(output_huffman_file, decompressed_file, tree);
+        free_tree(tree);
+        free_list(occ);
+
     }
     else{
         begin = clock();
@@ -43,6 +52,8 @@ int main(){
         printf("Huffman Output count : ");
         pretty_print(count_letters(output_huffman_file));
         end = clock();
+        //Decoding part
+        huffman_decompression(output_huffman_file, dico_file,  decompressed_file);
     }
     double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
     double ratio = 100 * (double)count_letters(output_huffman_file)/(double)count_letters(output_file);
