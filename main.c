@@ -35,9 +35,10 @@ int main(){
     if (!OPTI){
         begin = clock();
         huffman_compression(input_file, output_huffman_file);
+        end = clock();
         printf("Huffman Output count : "); 
         pretty_print(count_letters(output_huffman_file));
-        end = clock();
+        
         //Decoding part
         Element* occ = get_occurrences(input_file);
         Node* tree = get_huffman_tree(occ);
@@ -49,9 +50,10 @@ int main(){
     else{
         begin = clock();
         huffman_compression_opti(input_file, output_huffman_file);
+        end = clock();
         printf("Huffman Output count : ");
         pretty_print(count_letters(output_huffman_file));
-        end = clock();
+        
         //Decoding part
         huffman_decompression(output_huffman_file, dico_file,  decompressed_file);
     }
